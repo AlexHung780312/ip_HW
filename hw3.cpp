@@ -116,6 +116,11 @@ int main(int argc, char* argv[]) {
     moveWindow("Corners_Chamfer", 300, 400);
     waitKey(0);
 #endif
+    /// write out
+    imwrite("img/Boundary.tiff", star_img);
+    imwrite("img/Corners.tiff", corner_img);
+    imwrite("img/Boundary_Chamfer.tiff", star_D);
+    imwrite("img/Corners_Chamfer.tiff", corner_D);
   } catch (exception e) {
     cerr << "exception caught: " << e.what() << '\n';
   }

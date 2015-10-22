@@ -63,9 +63,11 @@ float log_add(float lna, float lnb) {
 /*
  * Method 2
  * 有95%機率會落在正負兩倍標準差區間內
+ * 如果sigma=10，區間為[-20,+20]時候相當於分佈面積會多了5%的部分
+ * 造成統計圖比Algo2.3方法還要凸起
  */
 inline void fillGaussianNoiseMethod2(Mat& img, float mean, float stdev,
-                                     mt19937& gen) {
+                                     mt19937& gen, bool fix_ = false) {
   float ceilling_ = mean + stdev * 2.f;
   float floor_ = mean - stdev * 2.f;
   int sections_ = 1024;
@@ -79,8 +81,8 @@ inline void fillGaussianNoiseMethod2(Mat& img, float mean, float stdev,
     log_sum = log_add(log_sum, pdfs[i + 1]);
     accu_pdfs[i + 1] = log_sum;
   }
-  float offset = log_sum - log(0.95) + log(0.025);
-  offset = -3.40282347E+38F;
+  float offset = -3.40282347E+38F;
+  if (fix_) offset = log_sum - log(0.95) + log(0.025);
   for (auto itr = accu_pdfs.begin(); itr != accu_pdfs.end(); itr++) {
     *itr = log_add(*itr, offset);
   }
@@ -117,10 +119,10 @@ inline void showImg(const char* title, const Mat& img, int x, int y) {
 
 /*
  * Method 3
- * 有99.75%機率會落在正負三倍標準差區間內，把剩下的0.25%配給0
+ * 有99.75%機率會落在正負三倍標準差區間內
  */
 inline void fillGaussianNoiseMethod3(Mat& img, float mean, float stdev,
-                                     mt19937& gen) {
+                                     mt19937& gen, bool fix_ = false) {
   float ceilling_ = mean + stdev * 3.f;
   float floor_ = mean - stdev * 3.f;
   int sections_ = 1024;
@@ -134,8 +136,8 @@ inline void fillGaussianNoiseMethod3(Mat& img, float mean, float stdev,
     log_sum = log_add(log_sum, pdfs[i + 1]);
     accu_pdfs[i + 1] = log_sum;
   }
-  float offset = log_sum - log(0.9975) + log(0.00125);
-  offset = -3.40282347E+38F;
+  float offset = -3.40282347E+38F;
+  if (fix_) offset = log_sum - log(0.95) + log(0.025);
   for (auto itr = accu_pdfs.begin(); itr != accu_pdfs.end(); itr++) {
     *itr = log_add(*itr, offset);
   }
@@ -147,7 +149,11 @@ inline void fillGaussianNoiseMethod3(Mat& img, float mean, float stdev,
     for (int x = 0; x < img.cols; x++) {
       float z = 0.f;
       float rn = log(dis(gen));
-      if (rn > accu_pdfs.front() && rn <= accu_pdfs[sections_ + 1]) {
+      if (rn <= accu_pdfs.front()) {
+        z = floor_;
+      } else if (rn > accu_pdfs[sections_ + 1]) {
+        z = ceilling_;
+      } else {
         for (int i = 0; i <= sections_; i++) {
           if (rn <= accu_pdfs[i + 1]) {
             z = floor_ + i * interv_;
