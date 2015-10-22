@@ -1,3 +1,4 @@
+// author: Alex Hung
 #include <opencv/cv.hpp>
 #include <iostream>
 #include <exception>
@@ -95,7 +96,11 @@ inline void fillGaussianNoiseMethod2(Mat& img, float mean, float stdev,
     for (int x = 0; x < img.cols; x++) {
       float z = 0.f;
       float rn = log(dis(gen));
-      if (rn > accu_pdfs.front() && rn <= accu_pdfs[sections_ + 1]) {
+      if (rn <= accu_pdfs.front()) {
+        z = floor_;
+      } else if (rn > accu_pdfs[sections_ + 1]) {
+        z = ceilling_;
+      } else {
         for (int i = 0; i <= sections_; i++) {
           if (rn <= accu_pdfs[i + 1]) {
             z = floor_ + i * interv_;
@@ -186,16 +191,21 @@ int main(int argc, char* argv[]) {
     fillGaussianNoiseMethod2(noise_m2_v10_img, 0, 10, gen);
     Mat noise_m2_v15_img(256, 256, CV_8UC1, Scalar(127));
     fillGaussianNoiseMethod2(noise_m2_v15_img, 0, 15, gen);
+    Mat noise_m2_v15_fix_img(256, 256, CV_8UC1, Scalar(127));
+    fillGaussianNoiseMethod2(noise_m2_v15_fix_img, 0, 15, gen, true);
     Mat hist_m2_v10_img = drawHistogram(noise_m2_v10_img);
     Mat hist_m2_v15_img = drawHistogram(noise_m2_v15_img);
+    Mat hist_m2_v15_fix_img = drawHistogram(noise_m2_v15_fix_img);
     /// add gaussian noise method3
     Mat noise_m3_v10_img(256, 256, CV_8UC1, Scalar(127));
     fillGaussianNoiseMethod3(noise_m3_v10_img, 0, 10, gen);
     Mat noise_m3_v15_img(256, 256, CV_8UC1, Scalar(127));
     fillGaussianNoiseMethod3(noise_m3_v15_img, 0, 15, gen);
+    Mat noise_m3_v15_fix_img(256, 256, CV_8UC1, Scalar(127));
+    fillGaussianNoiseMethod3(noise_m3_v15_fix_img, 0, 15, gen, true);
     Mat hist_m3_v10_img = drawHistogram(noise_m3_v10_img);
     Mat hist_m3_v15_img = drawHistogram(noise_m3_v15_img);
-
+    Mat hist_m3_v15_fix_img = drawHistogram(noise_m3_v15_fix_img);
 #ifdef SHOW_IMG_WINDOW
     showImg("Gray image (i=127)", gray_img, 0, 100);
     showImg("Algo2.3, sigma=10", noise_algo23_v10_img, 300, 100);
@@ -219,6 +229,26 @@ int main(int argc, char* argv[]) {
 
     waitKey(0);
 #endif
+    /// write out
+    imwrite("img/algo23_v10_img.tiff", noise_algo23_v10_img);
+    imwrite("img/algo23_v15_img.tiff", noise_algo23_v15_img);
+    imwrite("img/algo23_v10_hist.tiff", hist_algo23_v10_img);
+    imwrite("img/algo23_v15_hist.tiff", hist_algo23_v15_img);
+    ///
+    imwrite("img/m2_2sigma_v10_img.tiff", noise_m2_v10_img);
+    imwrite("img/m2_2sigma_v15_img.tiff", noise_m2_v15_img);
+    imwrite("img/m2_2sigma_v10_hist.tiff", hist_m2_v10_img);
+    imwrite("img/m2_2sigma_v15_hist.tiff", hist_m2_v15_img);
+    ///
+    imwrite("img/m2_3sigma_v10_img.tiff", noise_m3_v10_img);
+    imwrite("img/m2_3sigma_v15_img.tiff", noise_m3_v15_img);
+    imwrite("img/m2_3sigma_v10_hist.tiff", hist_m3_v10_img);
+    imwrite("img/m2_3sigma_v15_hist.tiff", hist_m3_v15_img);
+    ///
+    imwrite("img/m2_2sigma_v15_fix_img.tiff", noise_m2_v15_fix_img);
+    imwrite("img/m2_2sigma_v15_fix_hist.tiff", hist_m2_v15_fix_img);
+    imwrite("img/m2_3sigma_v15_fix_img.tiff", noise_m3_v15_fix_img);
+    imwrite("img/m2_3sigma_v15_fix_hist.tiff", hist_m3_v15_fix_img);
   } catch (exception e) {
     cerr << "exception caught: " << e.what() << '\n';
   }
