@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
     imwrite("img/Corners.tiff", corner_img);
     imwrite("img/Boundary_Chamfer.tiff", star_D);
     imwrite("img/Corners_Chamfer.tiff", corner_D);
-  } catch (exception e) {
+  } catch (exception& e) {
     cerr << "exception caught: " << e.what() << '\n';
   }
   return 0;

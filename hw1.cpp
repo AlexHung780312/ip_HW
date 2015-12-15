@@ -9,11 +9,11 @@ void bgr2gray(Mat& src, Mat& tgt) {
   /// I = (R+G+B)/3
   assert(src.rows == tgt.rows);
   assert(src.cols == tgt.cols);
-  for (int i = 0; i < src.rows; i++) {    // for each rows
-    for (int j = 0; j < src.cols; j++) {  // for each cols
+  for (int i = 0; i < src.cols; i++) {    // for each rows
+    for (int j = 0; j < src.rows; j++) {  // for each cols
       tgt.at<uchar>(j, i) =
-          (src.at<Vec3b>(i, j)[0] + src.at<cv::Vec3b>(i, j)[1] +
-           src.at<cv::Vec3b>(i, j)[2]) /
+          (src.at<Vec3b>(j, i)[0] + src.at<cv::Vec3b>(j, i)[1] +
+           src.at<cv::Vec3b>(j, i)[2]) /
           3;
     }
   }
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
   try {
     Mat img = imread(argv[1], CV_LOAD_IMAGE_COLOR);
     imwrite(argv[2], img);
-    Mat grey_img(img.cols, img.rows, CV_8UC1);
+    Mat grey_img(img.rows, img.cols, CV_8UC1);
     ///// cvtColor(img, grey_img, CV_BGR2GRAY);
     bgr2gray(img, grey_img);
     imwrite(argv[3], grey_img);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     imshow("Gray image", grey_img);
     waitKey(0);
 #endif
-  } catch (exception e) {
+  } catch (exception& e) {
     cerr << "exception caught: " << e.what() << '\n';
   }
   return 0;

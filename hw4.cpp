@@ -249,7 +249,7 @@ int main(int argc, char* argv[]) {
     imwrite("img/m2_2sigma_v15_fix_hist.tiff", hist_m2_v15_fix_img);
     imwrite("img/m2_3sigma_v15_fix_img.tiff", noise_m3_v15_fix_img);
     imwrite("img/m2_3sigma_v15_fix_hist.tiff", hist_m3_v15_fix_img);
-  } catch (exception e) {
+  } catch (exception& e) {
     cerr << "exception caught: " << e.what() << '\n';
   }
   return 0;
